@@ -25,6 +25,8 @@ jobs:
       run: ls -alh
 
     - name: Build Project and Show Output
+      env:
+      BASE_URL: '/nBody/'
       run: npm run build | tee build-output.log
       working-directory: ./
     
