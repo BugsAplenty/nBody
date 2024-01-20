@@ -23,7 +23,7 @@ jobs:
 
     - name: Build Project
       env:
-        BASE_URL: '/repository-name/'  # Replace with the path of your GitHub Pages site
+        BASE_URL: '/nBody/'  # Replace with the path of your GitHub Pages site
       run: npm run build
 
     - name: Deploy to GitHub Pages
