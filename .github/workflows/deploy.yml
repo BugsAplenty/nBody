@@ -26,10 +26,10 @@ jobs:
         BASE_URL: '/repository-name/'  # Replace with the path of your GitHub Pages site
       run: npm run build
 
-  - name: Deploy to GitHub Pages
-    uses: JamesIves/github-pages-deploy-action@4.1.4
-    with:
-      branch: gh-pages
-      folder: dist  # This should be just 'dist', not 'nBody/dist' or similar
-      clean: true
+    - name: Deploy to GitHub Pages
+      uses: JamesIves/github-pages-deploy-action@4.1.4
+      with:
+        branch: gh-pages
+        folder: dist  # This should be just 'dist', not 'nBody/dist' or similar
+        clean: true
 
