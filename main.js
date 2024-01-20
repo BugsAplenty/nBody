@@ -31,9 +31,11 @@ function init() {
 
     // Constants
     const AU = 100; // Scaled astronomical unit
-    const SUN_MASS = 333000; // Scaled mass (not realistic, but for visualization)
+    const SUN_MASS = 33300000000000; // Scaled mass (not realistic, but for visualization)
     const EARTH_MASS = 1; // Scaled mass
-    const EARTH_ORBITAL_VELOCITY = 2; // Scaled velocity (not realistic, but for visualization)
+    const MOON_MASS = 0.1;
+    const EARTH_ORBITAL_VELOCITY = 5; // Scaled velocity (not realistic, but for visualization)
+    const MOON_ORBITAL_VELOCITY = 2; // Scaled velocity (not realistic, but for visualization)
 
     // Sun
     let sun = new CelestialBody("Sun", 5, 0xffff00, SUN_MASS, new THREE.Vector3(0, 0, 0));
@@ -43,12 +45,19 @@ function init() {
     let earthInitialVelocity = new THREE.Vector3(0, EARTH_ORBITAL_VELOCITY, 0);
     let earth = new CelestialBody("Earth", 1, 0x0000ff, EARTH_MASS, earthInitialVelocity);
     earth.mesh.position.set(AU, 0, 0);
-    earth.addToScene(scene);
-    celestialBodies.push(sun, earth);
+
+    // Moon
+    let moonInitialVelocity = new THREE.Vector3(0, EARTH_ORBITAL_VELOCITY, 0);
+    let moon = new CelestialBody("Moon", 0.2, 0xffffff, MOON_MASS, moonInitialVelocity);
+    moon.mesh.position.set(AU+10, 0, 0);
+
 
     // Add them to the scene
     sun.addToScene(scene);
     earth.addToScene(scene);
+    moon.addToScene(scene);
+
+    celestialBodies.push(sun, earth, moon);
 
     // Start the animation loop
     animate();
