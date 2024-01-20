@@ -38,6 +38,7 @@ jobs:
       uses: JamesIves/github-pages-deploy-action@4.1.4
       with:
         branch: gh-pages
-        folder: dist  # This should be just 'dist', not 'nBody/dist' or similar
+        folder: dist
+        token: ${{ secrets.GH_PAGES_DEPLOY_TOKEN }}
         clean: true
 
