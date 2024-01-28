@@ -87,6 +87,8 @@ function init() {
 
     celestialBodies.push(sun, earth, moon);
 
+    // Create coordinate axes
+    createCoordinateAxes(new THREE.Vector3(0, 0, 0));
     // Start the animation loop
     animate();
 }
