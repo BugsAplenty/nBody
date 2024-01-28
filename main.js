@@ -123,7 +123,7 @@ function animate() {
 }
 
 function createCoordinateAxes(origin) {
-    const length = 50;
+    const length = 25;
     const headLength = 3;
     const headWidth = 2;
     const axes = {};
