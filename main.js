@@ -36,7 +36,7 @@ function init() {
     // Create the coordinate axes
     // Create the scene
     scene = new THREE.Scene();
-    createCoordinateAxes(new THREE.Vector3(0, 0, 0));
+    // createCoordinateAxes(new THREE.Vector3(0, 0, 0));
 
     scene.background = new THREE.Color(0x000000);
 
