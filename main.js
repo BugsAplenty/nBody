@@ -6,16 +6,6 @@ let clock = new THREE.Clock();
 let scene, camera, renderer;
 let celestialBodies = []; // Array to hold all celestial bodies
 let controls;
-const physicsWorker = new Worker('physicsWorker.js');
-
-physicsWorker.addEventListener('message', function (e) {
-    const updatedBodies = e.data.results;
-    // Update your celestial bodies with the data received from the worker
-    updatedBodies.forEach((updated, index) => {
-        celestialBodies[index].mesh.position.set(updated.position.x, updated.position.y, updated.position.z);
-        celestialBodies[index].velocity = new THREE.Vector3(updated.velocity.x, updated.velocity.y, updated.velocity.z);
-    });
-});
 
 function initStats() {
     const stats = new Stats();
@@ -75,17 +65,22 @@ function init() {
     earth.mesh.position.set(AU, 0, 0);
 
     // Moon
-    let moonInitialVelocity = new THREE.Vector3(0, EARTH_ORBITAL_VELOCITY, 0);
+    let moonInitialVelocity = new THREE.Vector3(0, EARTH_ORBITAL_VELOCITY * 0.75, 0);
     let moon = new CelestialBody("Moon", 0.2, 0xffffff, MOON_MASS, moonInitialVelocity);
     moon.mesh.position.set(AU+10, 0, 0);
 
+    // Glorb
+    let glorbInitialVelocity = new THREE.Vector3(EARTH_ORBITAL_VELOCITY * 0.75, EARTH_ORBITAL_VELOCITY * 0.75, 0);
+    let glorb = new CelestialBody("Glorb", 1.5, 'orange', EARTH_MASS * 2, glorbInitialVelocity);
+    glorb.mesh.position.set(30, 30, 30);
 
     // Add them to the scene
     sun.addToScene(scene);
     earth.addToScene(scene);
     moon.addToScene(scene);
+    glorb.addToScene(scene);
 
-    celestialBodies.push(sun, earth, moon);
+    celestialBodies.push(sun, earth, moon, glorb);
 
     // Create coordinate axes
     createCoordinateAxes(new THREE.Vector3(0, 0, 0));
@@ -111,14 +106,12 @@ function animate() {
     stats.begin();
     requestAnimationFrame(animate);
 
-    // Prepare data to send to the worker
-    const bodiesData = celestialBodies.map(body => ({
-        position: body.mesh.position,
-        velocity: body.velocity,
-        mass: body.mass
-    }));
+    let deltaTime = clock.getDelta();
 
-    physicsWorker.postMessage({ bodies: bodiesData, deltaTime: clock.getDelta() });
+    // Update positions of celestial bodies
+    celestialBodies.forEach(body => {
+        body.updatePosition(celestialBodies, deltaTime);
+    });
     controls.update();
     renderer.render(scene, camera);
     stats.end();

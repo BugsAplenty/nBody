@@ -13,7 +13,7 @@ export default class CelestialBody {
         this.angle = 0; // Starting angle for orbit, if applicable
         this.mesh = null;
         this.createMesh();
-
+        this.createTail();
     }
 
     createMesh() {
@@ -25,6 +25,48 @@ export default class CelestialBody {
 
     addToScene(scene) {
         scene.add(this.mesh);
+        scene.add(this.tail); // Add the tail to the scene
+    }
+
+    createTail() {
+        const tailLength = 1000; // Number of particles in the tail
+        const positions = new Float32Array(tailLength * 3); // each particle is a vertex (x, y, z)
+
+        for (let i = 0; i < tailLength; i++) {
+            positions[i * 3] = this.mesh.position.x;
+            positions[i * 3 + 1] = this.mesh.position.y;
+            positions[i * 3 + 2] = this.mesh.position.z;
+        }
+
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        const material = new THREE.PointsMaterial({
+            color: this.color, // Tail color
+            size: 0.05,       // Particle size
+            transparent: true
+        });
+
+        this.tail = new THREE.Points(geometry, material);
+    }
+
+    updateTail() {
+        if (!this.tail) return;
+    
+        const positions = this.tail.geometry.attributes.position.array;
+    
+        // Shift positions for the tail particles
+        for (let i = positions.length - 3; i >= 3; i -= 3) {
+            positions[i] = positions[i - 3];
+            positions[i + 1] = positions[i - 2];
+            positions[i + 2] = positions[i - 1];
+        }
+    
+        // Set the first particle to the position of the body
+        positions[0] = this.mesh.position.x;
+        positions[1] = this.mesh.position.y;
+        positions[2] = this.mesh.position.z;
+    
+        this.tail.geometry.attributes.position.needsUpdate = true;
     }
 
     updatePosition(bodies, deltaTime) {
@@ -45,5 +87,6 @@ export default class CelestialBody {
 
         // Update position based on velocity
         this.mesh.position.add(this.velocity.clone().multiplyScalar(deltaTime));
+        this.updateTail();
     }
 }
