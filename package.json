@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "http-server": "^14.1.1",
+    "stats": "^1.0.0",
     "three": "^0.160.0"
   },
   "devDependencies": {

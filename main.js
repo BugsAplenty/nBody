@@ -1,19 +1,47 @@
 import CelestialBody from './CelestialBody.js'
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-
+import Stats from 'https://cdnjs.cloudflare.com/ajax/libs/stats.js/17/Stats.js'
 let clock = new THREE.Clock();
 let scene, camera, renderer;
 let celestialBodies = []; // Array to hold all celestial bodies
 let controls;
+const physicsWorker = new Worker('physicsWorker.js');
+
+physicsWorker.addEventListener('message', function (e) {
+    const updatedBodies = e.data.results;
+    // Update your celestial bodies with the data received from the worker
+    updatedBodies.forEach((updated, index) => {
+        celestialBodies[index].mesh.position.set(updated.position.x, updated.position.y, updated.position.z);
+        celestialBodies[index].velocity = new THREE.Vector3(updated.velocity.x, updated.velocity.y, updated.velocity.z);
+    });
+});
+
+function initStats() {
+    const stats = new Stats();
+    stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+    stats.dom.style.position = 'absolute';
+    stats.dom.style.top = '0px';
+    stats.dom.style.left = '0px';
+
+    // Style the FPS display
+    stats.dom.style.color = 'green';
+    stats.dom.style.background = 'rgba(0, 0, 0, 0.7)'; // Semi-transparent black background
+
+    document.body.appendChild(stats.dom);
+    return stats;
+}
 
 function init() {
+    // Create the coordinate axes
     // Create the scene
     scene = new THREE.Scene();
+    createCoordinateAxes(new THREE.Vector3(0, 0, 0));
+
     scene.background = new THREE.Color(0x000000);
 
     // Create and position the camera
-    camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 2000);
+    camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 2000);
     camera.position.z = 10;
 
     // Create the renderer and append it to the DOM
@@ -78,17 +106,20 @@ function updateCameraFocus(targetBody) {
 }
 
 function animate() {
-    createCoordinateAxes();
+    stats.begin();
     requestAnimationFrame(animate);
 
-    let deltaTime = clock.getDelta();
+    // Prepare data to send to the worker
+    const bodiesData = celestialBodies.map(body => ({
+        position: body.mesh.position,
+        velocity: body.velocity,
+        mass: body.mass
+    }));
 
-    // Update positions of celestial bodies
-    celestialBodies.forEach(body => {
-        body.updatePosition(celestialBodies, deltaTime);
-    });
+    physicsWorker.postMessage({ bodies: bodiesData, deltaTime: clock.getDelta() });
     controls.update();
     renderer.render(scene, camera);
+    stats.end();
 }
 
 function createCoordinateAxes(origin) {
@@ -112,5 +143,5 @@ function createCoordinateAxes(origin) {
     return axes;
 }
 
-
+const stats = initStats();
 init();
